@@ -50,11 +50,38 @@ impl Hittable for Sphere {
     }
 }
 
-struct Plane {
+pub struct Plane {
     normal: Vec3,
     origin: Point3,
 }
 
 impl Plane {
-    pub fn new(origin: Point3, normal: Vec3) -> Self { Self { origin, normal }}
+    // Ensure normal is unit length
+    pub fn new(normal: Vec3, origin: Point3) -> Self { Self { normal: normal / normal.length(), origin }}
+}
+
+impl Hittable for Plane {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+        // Assume all vectors involved are normalized
+        let denom = dot(&self.normal, r.direction());
+        if denom.abs() <= 1e-8 {
+            return None;
+        }
+
+        let o_r0 = self.origin - *r.origin();
+        let t = dot(&o_r0, &self.normal) / denom;
+        if t <= t_min || t > t_max {
+            return None;
+        }
+        let mut rec = HitRecord {
+            t,
+            p: r.at(t),
+            normal: self.normal,
+            front_face: true,
+        };
+        let outward_normal = rec.normal;
+        rec.set_face_normal(r, &outward_normal);
+
+        Some(rec)
+    }
 }

@@ -1,6 +1,7 @@
 ﻿use std::sync::Arc;
 use crate::ray::*;
 use crate::vectors::*;
+use crate::interval::*;
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct HitRecord {
@@ -20,7 +21,7 @@ impl HitRecord {
 }
 
 pub trait Hittable {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> { None }
+    fn hit(&self, ray: &Ray, ray_t: &Interval) -> Option<HitRecord> { None }
 }
 
 pub struct HittableList {
@@ -36,12 +37,12 @@ impl HittableList {
 }
 
 impl Hittable for HittableList {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, ray_t: &Interval) -> Option<HitRecord> {
         let mut hit_record = None;
-        let mut closest_so_far = t_max;
+        let mut closest_so_far = ray_t.max;
 
         for object in &self.objects {
-            if let Some(temp_rec) =  object.hit(ray, t_min, closest_so_far) {
+            if let Some(temp_rec) =  object.hit(ray, &Interval::new(ray_t.min, closest_so_far)) {
                 closest_so_far = temp_rec.t;
                 hit_record = Some(temp_rec);
             }

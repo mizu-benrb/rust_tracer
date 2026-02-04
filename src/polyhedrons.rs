@@ -1,4 +1,5 @@
 ﻿use crate::hittable::{HitRecord, Hittable};
+use crate::interval::Interval;
 use crate::ray::Ray;
 use crate::vectors::*;
 
@@ -12,7 +13,7 @@ impl Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+    fn hit(&self, r: &Ray, ray_t: &Interval) -> Option<HitRecord> {
         let center = self.center;
         let radius = self.radius;
 
@@ -30,9 +31,9 @@ impl Hittable for Sphere {
 
         // Find nearest root within acceptable range
         let mut root = (h - sqrt_d) / a;
-        if (root <= t_min || t_max < root) {
+        if (!ray_t.surrounds(root)) {
             root = (h + sqrt_d) / a;
-            if (root <= t_min || t_max < root) {
+            if (!ray_t.surrounds(root)) {
                 return None;
             }
         }
@@ -61,7 +62,7 @@ impl Plane {
 }
 
 impl Hittable for Plane {
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+    fn hit(&self, r: &Ray, ray_t: &Interval) -> Option<HitRecord> {
         // Assume all vectors involved are normalized
         let denom = dot(&self.normal, r.direction());
         if denom.abs() <= 1e-8 {
@@ -70,7 +71,7 @@ impl Hittable for Plane {
 
         let o_r0 = self.origin - *r.origin();
         let t = dot(&o_r0, &self.normal) / denom;
-        if t <= t_min || t > t_max {
+        if !ray_t.surrounds(t) {
             return None;
         }
         let mut rec = HitRecord {

@@ -42,10 +42,22 @@ impl Color {
     }
 }
 
+#[inline]
+fn linear_to_gamma(linear_component: f64) -> f64{
+    if linear_component > 0.0 {
+        return linear_component.sqrt();
+    }
+    0.0
+}
+
 pub fn write_color(pixel_color: &Color) {
-    let r = if pixel_color.x() < 0.0 { 0.0 } else if pixel_color.x() > 1.0 { 1.0 } else { pixel_color.x() };
-    let g = if pixel_color.y() < 0.0 { 0.0 } else if pixel_color.y() > 1.0 { 1.0 } else { pixel_color.y() };
-    let b = if pixel_color.z() < 0.0 { 0.0 } else if pixel_color.z() > 1.0 { 1.0 } else { pixel_color.z() };
+    let mut r = if pixel_color.x() < 0.0 { 0.0 } else if pixel_color.x() > 1.0 { 1.0 } else { pixel_color.x() };
+    let mut g = if pixel_color.y() < 0.0 { 0.0 } else if pixel_color.y() > 1.0 { 1.0 } else { pixel_color.y() };
+    let mut b = if pixel_color.z() < 0.0 { 0.0 } else if pixel_color.z() > 1.0 { 1.0 } else { pixel_color.z() };
+
+    r = linear_to_gamma(r);
+    g = linear_to_gamma(g);
+    b = linear_to_gamma(b);
 
     // Translate [0-1] component values to [0,255] range
     static INTENSITY: Interval = Interval { min: 0.000, max: 0.999 };

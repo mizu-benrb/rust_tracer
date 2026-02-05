@@ -212,6 +212,28 @@ pub fn unit_vector(v: Vec3) -> Vec3 {
     v / len
 }
 
+#[inline]
+pub fn random_unit_vector() -> Vec3 {
+    // EVISCERATE THIS AND REPLACE WITH SOMETHING BETTER
+    loop {
+        let p = Vec3::random_range(-1.0, 1.0);
+        let len_sq = p.length_squared();
+        if 1e-160 < len_sq && len_sq <= 1.0 {
+            return p / len_sq.sqrt();
+        }
+    }
+}
+
+#[inline]
+pub fn random_on_hemisphere(normal: &Vec3) -> Vec3 {
+    let on_unit_sphere = random_unit_vector();
+    if(dot(&on_unit_sphere, &normal) > 0.0) {
+        on_unit_sphere
+    } else {
+        -on_unit_sphere
+    }
+}
+
 // Implement associated functions, overloaded operators for Vec2
 impl Default for Vec4 {
     fn default() -> Self {

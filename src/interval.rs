@@ -6,7 +6,7 @@ pub struct Interval {
 
 impl Default for Interval {
     fn default() -> Interval {
-        Interval { min: f64::NEG_INFINITY, max: f64::NEG_INFINITY }
+        Interval { min: f64::INFINITY, max: f64::NEG_INFINITY }
     }
 }
 

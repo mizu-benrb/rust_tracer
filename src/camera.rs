@@ -3,7 +3,7 @@ use crate::color::{write_color, Color};
 use crate::hittable::Hittable;
 use crate::interval::Interval;
 use crate::ray::Ray;
-use crate::utility::{random_double, sample_square};
+use crate::utility::{sample_square};
 use crate::vectors::{unit_vector, Point3, Vec3};
 
 pub struct Camera {
@@ -48,12 +48,12 @@ impl Camera {
         // PPM file settings
         println!("P3\n{image_width} {image_height}\n255");
 
-        for j in 0..image_height as u32 {
+        for j in 0..image_height {
             progress_bar.inc(1);
 
-            for i in 0..image_width as u32 {
+            for i in 0..image_width {
                 let mut pixel_color = Color::new(0.0, 0.0, 0.0);
-                for s in 0..self.samples_per_pixel {
+                for _s in 0..self.samples_per_pixel {
                     let r = self.get_ray(i, j);
                     pixel_color += self.ray_color(&r, world);
                 }
@@ -109,7 +109,7 @@ impl Camera {
         let ray_origin = self.center;
         let ray_direction = pixel_sample - self.center;
 
-        Ray::new(self.center, ray_direction)
+        Ray::new(ray_origin, ray_direction)
     }
 
     fn ray_color(&mut self, r: &Ray, world: &dyn Hittable) -> Color {

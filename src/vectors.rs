@@ -1,5 +1,6 @@
 ﻿use std::ops;
 use std::fmt;
+use crate::utility::{random_double, range_double};
 
 // Struct definition for different dimension vectors
 #[derive(Copy, Clone, Debug)]
@@ -72,6 +73,14 @@ impl Vec3 {
     
     pub fn length_squared(&self) -> f64 {
         self.x() * self.x() + self.y() * self.y() + self.z() * self.z()
+    }
+
+    pub fn random() -> Vec3 {
+        Vec3::new(random_double(), random_double(), random_double())
+    }
+
+    pub fn random_range(min: f64, max: f64) -> Vec3 {
+        Vec3::new(range_double(min, max), range_double(min, max), range_double(min, max))
     }
 }
 

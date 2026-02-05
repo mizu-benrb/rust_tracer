@@ -48,10 +48,10 @@ pub fn write_color(pixel_color: &Color) {
     let b = if pixel_color.z() < 0.0 { 0.0 } else if pixel_color.z() > 1.0 { 1.0 } else { pixel_color.z() };
 
     // Translate [0-1] component values to [0,255] range
-    static intensity: Interval = Interval { min: 0.000, max: 0.999 };
-    let r_byte = (256.0 * intensity.clamp(r)) as u8;
-    let g_byte = (256.0 * intensity.clamp(g)) as u8;
-    let b_byte = (256.0 * intensity.clamp(b)) as u8;
+    static INTENSITY: Interval = Interval { min: 0.000, max: 0.999 };
+    let r_byte = (256.0 * INTENSITY.clamp(r)) as u8;
+    let g_byte = (256.0 * INTENSITY.clamp(g)) as u8;
+    let b_byte = (256.0 * INTENSITY.clamp(b)) as u8;
 
     println!("{} {} {}", r_byte, g_byte, b_byte);
 }

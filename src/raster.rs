@@ -125,7 +125,9 @@ impl Polygon for Triangle {
 }
 
 impl Polygon for Circle {
-    fn draw(&self, canvas: &Canvas, buffer: &mut Vec<Color>) {}
+    fn draw(&self, canvas: &Canvas, buffer: &mut Vec<Color>) {
+        self.draw_fill(canvas, buffer);
+    }
     fn draw_fill(&self, canvas: &Canvas, buffer: &mut Vec<Color>) {
         let center_x = self.center.0;
         let center_y = self.center.1;
@@ -246,7 +248,7 @@ pub fn output_ppm(c: &Canvas, buffer: &Vec<Color>) {
         progress_bar.inc(1);
 
         for i in 0..c.width as u32 {
-            write_color(&buffer[j as usize * c.width as usize + i as usize]);
+            write_color(&buffer[j as usize * c.width + i as usize]);
         }
     }
 }

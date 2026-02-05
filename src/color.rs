@@ -1,5 +1,6 @@
 ﻿use crate::vectors::Vec3;
 use std::convert::From;
+use crate::interval::Interval;
 
 pub type Color = Vec3; // Change in future to Vec4 for alpha
 
@@ -46,10 +47,12 @@ pub fn write_color(pixel_color: &Color) {
     let g = if pixel_color.y() < 0.0 { 0.0 } else if pixel_color.y() > 1.0 { 1.0 } else { pixel_color.y() };
     let b = if pixel_color.z() < 0.0 { 0.0 } else if pixel_color.z() > 1.0 { 1.0 } else { pixel_color.z() };
 
-    let rbyte = (255.999 * r) as u8;
-    let gbyte = (255.999 * g) as u8;
-    let bbyte = (255.999 * b) as u8;
+    // Translate [0-1] component values to [0,255] range
+    static intensity: Interval = Interval { min: 0.000, max: 0.999 };
+    let r_byte = (256.0 * intensity.clamp(r)) as u8;
+    let g_byte = (256.0 * intensity.clamp(g)) as u8;
+    let b_byte = (256.0 * intensity.clamp(b)) as u8;
 
-    println!("{} {} {}", rbyte, gbyte, bbyte);
+    println!("{} {} {}", r_byte, g_byte, b_byte);
 }
 

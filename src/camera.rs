@@ -1,4 +1,5 @@
-﻿use indicatif::{ProgressBar, ProgressStyle};
+﻿use std::time::Instant;
+use indicatif::{ProgressBar, ProgressStyle};
 use crate::color::{write_color, Color};
 use crate::hittable::Hittable;
 use crate::interval::Interval;
@@ -72,6 +73,8 @@ impl Camera {
             .progress_chars("##-"));
         progress_bar.set_prefix("Scanlines completed...");
 
+        let now = Instant::now();
+
         // Render
         // PPM file settings
         println!("P3\n{image_width} {image_height}\n255");
@@ -89,6 +92,8 @@ impl Camera {
                 write_color(&pixel_color);
             }
         }
+
+        eprintln!("{} ms", now.elapsed().as_millis());
     }
 
     // Private methods and variables here

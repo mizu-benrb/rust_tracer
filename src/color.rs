@@ -40,6 +40,13 @@ impl Color {
         
         Color { e: [new_r, new_g, new_b] }
     }
+    
+    pub const BLACK: Color = Color { e: [0.0, 0.0, 0.0] };
+    pub const WHITE: Color = Color { e: [1.0, 1.0, 1.0] };
+    pub const RED: Color = Color { e: [1.0, 0.0, 0.0] };
+    pub const GREEN: Color = Color { e: [0.0, 1.0, 0.0] };
+    pub const BLUE: Color = Color { e: [0.0, 0.0, 1.0] };
+    pub const GRAY: Color = Color { e: [0.5, 0.5, 0.5] };
 }
 
 #[inline]

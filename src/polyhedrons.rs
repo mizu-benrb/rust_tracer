@@ -1,15 +1,18 @@
-﻿use crate::hittable::{HitRecord, Hittable};
+﻿use std::sync::Arc;
+use crate::hittable::{HitRecord, Hittable};
 use crate::interval::Interval;
+use crate::material::Material;
 use crate::ray::Ray;
 use crate::vectors::*;
 
 pub struct Sphere {
     center: Vec3,
     radius: f64,
+    mat: Arc<dyn Material>,
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, radius: f64) -> Self { Self { center, radius: radius.max(0.0) } }
+    pub fn new(center: Vec3, radius: f64, mat: Arc<dyn Material>) -> Self { Self { center, radius: radius.max(0.0), mat } }
 }
 
 impl Hittable for Sphere {
@@ -41,6 +44,7 @@ impl Hittable for Sphere {
         let mut hit_record: HitRecord = HitRecord {
             t: root,
             p: r.at(root),
+            mat: self.mat.clone(),
             normal: (r.at(root) - center) / radius,
             front_face: true,
         };
@@ -54,11 +58,12 @@ impl Hittable for Sphere {
 pub struct Plane {
     normal: Vec3,
     origin: Point3,
+    mat: Arc<dyn Material>,
 }
 
 impl Plane {
     // Ensure normal is unit length
-    pub fn new(normal: Vec3, origin: Point3) -> Self { Self { normal: normal / normal.length(), origin }}
+    pub fn new(normal: Vec3, origin: Point3, mat: Arc<dyn Material>) -> Self { Self { normal: normal / normal.length(), origin, mat }}
 }
 
 impl Hittable for Plane {
@@ -77,6 +82,7 @@ impl Hittable for Plane {
         let mut rec = HitRecord {
             t,
             p: r.at(t),
+            mat: self.mat.clone(),
             normal: self.normal,
             front_face: true,
         };

@@ -11,6 +11,8 @@ pub struct Camera {
     pub image_width: u32,
     pub samples_per_pixel: u32,
     pub max_depth: u32,
+    pub vfov: f64,
+
     image_height: u32,
     pixel_samples_scale: f64,
     center: Point3,
@@ -21,11 +23,12 @@ pub struct Camera {
 
 impl Camera {
     // Public-facing methods and variables here
-    pub fn new(aspect_ratio: f64, image_width: u32, samples_per_pixel: u32, max_depth: u32) -> Self { Camera {
+    pub fn new(aspect_ratio: f64, image_width: u32, samples_per_pixel: u32, max_depth: u32, vfov: f64) -> Self { Camera {
         aspect_ratio,
         image_width,
         samples_per_pixel,
         max_depth,
+        vfov,
         image_height: 0,
         pixel_samples_scale: Default::default(),
         center: Default::default(),
@@ -76,7 +79,9 @@ impl Camera {
 
         // Camera
         let focal_length = 1.0;
-        let viewport_height = 2.0;
+        let theta = self.vfov.to_radians();
+        let h = (theta / 2.0).tan();
+        let viewport_height = 2.0 * h * focal_length;
         let viewport_width = viewport_height * (self.image_width as f64 / self.image_height as f64);
         self.center = Point3::new(0.0, 0.0, 0.0);
 
@@ -120,8 +125,10 @@ impl Camera {
         }
 
         if let Some(temp_rec) = world.hit(r, &Interval::new(0.001, f64::INFINITY)) {
-            let direction = temp_rec.normal + random_unit_vector();
-            return 0.5 * self.ray_color(&Ray::new(temp_rec.p, direction), depth-1, world);
+            if let Some((attenuation, scatter)) = temp_rec.mat.scatter(r, &temp_rec) {
+                return attenuation * self.ray_color(&scatter, depth - 1, world);
+            }
+            return Color::new(0.0, 0.0, 0.0);
         }
 
         let unit_direction = unit_vector(*r.direction());

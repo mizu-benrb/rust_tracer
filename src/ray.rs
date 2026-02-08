@@ -1,6 +1,7 @@
 ﻿use crate::vectors::Vec3;
 use crate::vectors::Point3;
 
+#[derive(Copy, Clone, Debug)]
 pub struct Ray {
     origin: Point3,
     dir: Vec3,

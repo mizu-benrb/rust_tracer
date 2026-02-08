@@ -1,5 +1,6 @@
 ﻿use std::ops;
 use std::fmt;
+use rand::random_range;
 use crate::utility::{random_double, range_double};
 
 // Struct definition for different dimension vectors
@@ -215,6 +216,16 @@ pub fn cross(lhs: &Vec3, rhs: &Vec3) -> Vec3 {
 pub fn unit_vector(v: Vec3) -> Vec3 {
     let len: f64 = v.length();
     v / len
+}
+
+#[inline]
+pub fn random_in_unit_disk() -> Vec3 {
+    loop {
+        let p = Vec3::new(range_double(-1.0, 1.0), range_double(-1.0, 1.0), 0.0);
+        if p.length_squared() < 1.0 {
+            return p;
+        }
+    }
 }
 
 #[inline]

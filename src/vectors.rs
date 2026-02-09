@@ -1,6 +1,6 @@
 ﻿use std::ops;
 use std::fmt;
-use rand::random_range;
+use rand::rngs::ThreadRng;
 use crate::utility::{random_double, range_double};
 
 // Struct definition for different dimension vectors
@@ -81,12 +81,12 @@ impl Vec3 {
         (self.x().abs() < s) && (self.y().abs() < s) && (self.z().abs() < s)
     }
 
-    pub fn random() -> Vec3 {
-        Vec3::new(random_double(), random_double(), random_double())
+    pub fn random(thread_rng: &mut Option<&mut ThreadRng>) -> Vec3 {
+        Vec3::new(random_double(thread_rng), random_double(thread_rng), random_double(thread_rng))
     }
 
-    pub fn random_range(min: f64, max: f64) -> Vec3 {
-        Vec3::new(range_double(min, max), range_double(min, max), range_double(min, max))
+    pub fn random_range(min: f64, max: f64, thread_rng: &mut Option<&mut ThreadRng>) -> Vec3 {
+        Vec3::new(range_double(min, max, thread_rng), range_double(min, max, thread_rng), range_double(min, max, thread_rng))
     }
 }
 
@@ -219,9 +219,9 @@ pub fn unit_vector(v: Vec3) -> Vec3 {
 }
 
 #[inline]
-pub fn random_in_unit_disk() -> Vec3 {
+pub fn random_in_unit_disk(thread_rng: &mut Option<&mut ThreadRng>) -> Vec3 {
     loop {
-        let p = Vec3::new(range_double(-1.0, 1.0), range_double(-1.0, 1.0), 0.0);
+        let p = Vec3::new(range_double(-1.0, 1.0, thread_rng), range_double(-1.0, 1.0, thread_rng), 0.0);
         if p.length_squared() < 1.0 {
             return p;
         }
@@ -229,10 +229,10 @@ pub fn random_in_unit_disk() -> Vec3 {
 }
 
 #[inline]
-pub fn random_unit_vector() -> Vec3 {
+pub fn random_unit_vector(thread_rng: &mut Option<&mut ThreadRng>) -> Vec3 {
     // EVISCERATE THIS AND REPLACE WITH SOMETHING BETTER
     loop {
-        let p = Vec3::random_range(-1.0, 1.0);
+        let p = Vec3::random_range(-1.0, 1.0, thread_rng);
         let len_sq = p.length_squared();
         if 1e-160 < len_sq && len_sq <= 1.0 {
             return p / len_sq.sqrt();
@@ -241,9 +241,9 @@ pub fn random_unit_vector() -> Vec3 {
 }
 
 #[inline]
-pub fn random_on_hemisphere(normal: &Vec3) -> Vec3 {
-    let on_unit_sphere = random_unit_vector();
-    if(dot(&on_unit_sphere, &normal) > 0.0) {
+pub fn random_on_hemisphere(normal: &Vec3, thread_rng: &mut Option<&mut ThreadRng>) -> Vec3 {
+    let on_unit_sphere = random_unit_vector(thread_rng);
+    if dot(&on_unit_sphere, &normal) > 0.0 {
         on_unit_sphere
     } else {
         -on_unit_sphere

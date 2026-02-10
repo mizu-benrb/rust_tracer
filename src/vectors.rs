@@ -88,6 +88,8 @@ impl Vec3 {
     pub fn random_range(min: f64, max: f64, thread_rng: &mut Option<&mut ThreadRng>) -> Vec3 {
         Vec3::new(range_double(min, max, thread_rng), range_double(min, max, thread_rng), range_double(min, max, thread_rng))
     }
+    
+    pub const ZERO: Vec3 = Vec3 { e: [0.0, 0.0, 0.0] };
 }
 
 impl Default for Vec3 {

@@ -27,7 +27,7 @@ const PHI: f64 = 1.618033988749894;
 
 fn main() {
     // HW 2
-    render_ray_image();
+    render_ray_image_4();
 }
 
 fn render_ray_image() {
@@ -84,45 +84,124 @@ fn render_ray_image() {
 fn render_ray_image_2() {
 
     let mut world: HittableList = HittableList::new_empty();
-    let material_ground = Arc::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
+    let material_ground = Arc::new(Lambertian::new(Color::new(0.9, 0.3, 0.5)));
     world.add(Arc::new(
         Plane::new(Point3::new(0.0, 1.0, 0.0), Vec3::new(0.0, 0.0, 0.0), material_ground)));
 
-    for a in -11..11 {
-        for b in -11..11 {
-            let choose_material = random_double(&mut None);
-            let center = Point3::new(a as f64 + 0.9 * random_double(&mut None), 0.2, b as f64 + 0.9 * random_double(&mut None));
+    let material_glass = Arc::new(Dielectric::new(1.00/1.33));
+    let one_third_sqrt = (1.0f64 / 3.0f64).sqrt();
+    let starting_point = Point3::new(1.0, 0.2, -2.0);
 
-            if (center - Point3::new(4.0, 0.2, 0.0)).length() > 0.9 {
-                let sphere_material: Arc<dyn Material> =
-                    if choose_material < 0.8 {
-                        let albedo = Color::random(&mut None) * Color::random(&mut None);
-                        Arc::new(Lambertian::new(albedo))
-                    } else if choose_material < 0.95 {
-                        let albedo = Color::random_range(0.5, 1.0, &mut None);
-                        let fuzz = range_double(0.0, 0.5, &mut None);
-                        Arc::new(Metal::new(albedo, fuzz))
-                    } else {
-                        Arc::new(Dielectric::new(1.5))
-                    };
-
-                world.add(Arc::new(Sphere::new(center, 0.2, sphere_material)));
-            }
-
-        }
+    for i in 0..10 {
+        let size_interval = 1.0 + i as f64;
+        let center = starting_point + Point3::new(one_third_sqrt * size_interval, one_third_sqrt * size_interval,-one_third_sqrt * size_interval);
+        world.add(Arc::new(
+            Sphere::new(center, size_interval / 2.2, material_glass.clone())));
     }
 
-    let material_1 = Arc::new(Dielectric::new(1.5));
-    let material_2 = Arc::new(Lambertian::new(Color::new(0.4, 0.2, 0.1)));
-    let material_3 = Arc::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0));
+    let mut cam: Camera = Camera::new( 16.0 / 9.0, 1920, 512, 32, 60.0);
 
-    world.add(Arc::new(Sphere::new(Point3::new(0.0, 1.0, 0.0), 1.0, material_1)));
-    world.add(Arc::new(Sphere::new(Point3::new(-4.0, 1.0, 0.0), 1.0, material_2)));
-    world.add(Arc::new(Sphere::new(Point3::new(4.0, 1.0, 0.0), 1.0, material_3)));
+    cam.look_from = Point3::new(0.3, 0.2, 0.0);
+    cam.look_at = Point3::new(0.8, 0.7, -1.0);
+    cam.vup = Vec3::new(0.0, 1.0, 0.0);
 
-    let mut cam: Camera = Camera::new( 16.0 / 9.0, 1920, 512, 50, 20.0);
+    cam.defocus_angle = 0.6;
+    cam.focus_dist = 5.0;
 
-    cam.look_from = Point3::new(13.0, 2.0, 3.0);
+    cam.render(&world);
+}
+
+fn render_ray_image_3() {
+
+    let mut world: HittableList = HittableList::new_empty();
+    let material_ground = Arc::new(Lambertian::new(Color::new(0.70, 0.70, 0.9)));
+    world.add(Arc::new(
+        Plane::new(Point3::new(0.0, 1.0, 0.0), Vec3::new(0.0, 0.0, 0.0), material_ground)));
+
+    let material_snow = Arc::new(Lambertian::new(Color::WHITE));
+    let material_coal = Arc::new(Metal::new(Color::new(0.05, 0.05, 0.05), 0.6));
+    let material_glass = Arc::new(Dielectric::new(1.5));
+
+    // Snowballs
+    world.add(Arc::new(
+        Sphere::new(Point3::new(0.0, 6.0, 0.0), 6.0, material_snow.clone())));
+    world.add(Arc::new(
+        Sphere::new(Point3::new(0.0, 13.0, 0.0), 4.5, material_snow.clone())));
+    world.add(Arc::new(
+        Sphere::new(Point3::new(0.0, 19.5, 0.0), 3.5, material_snow.clone())));
+
+    // Eyes
+    world.add(Arc::new(
+        Sphere::new(Point3::new(1.0, 19.5, -3.3), 0.5, material_coal.clone())));
+    world.add(Arc::new(
+        Sphere::new(Point3::new(1.0, 19.5, -3.3), 1.0, material_glass.clone())));
+    world.add(Arc::new(
+        Sphere::new(Point3::new(-1.0, 19.5, -3.3), 0.5, material_coal.clone())));
+    world.add(Arc::new(
+        Sphere::new(Point3::new(-1.0, 19.5, -3.3), 1.0, material_glass.clone())));
+
+    // Mouth
+    world.add(Arc::new(
+        Sphere::new(Point3::new(0.0, 17.6, -3.3), 0.3, material_coal.clone())));
+    world.add(Arc::new(
+        Sphere::new(Point3::new(0.6, 18.1, -3.3), 0.3, material_coal.clone())));
+    world.add(Arc::new(
+        Sphere::new(Point3::new(-0.6, 18.1, -3.3), 0.3, material_coal.clone())));
+
+    // Suit
+    world.add(Arc::new(
+        Sphere::new(Point3::new(0.0, 12.0, -4.3), 0.3, material_coal.clone())));
+    world.add(Arc::new(
+        Sphere::new(Point3::new(0.0, 13.0, -4.4), 0.3, material_coal.clone())));
+    world.add(Arc::new(
+        Sphere::new(Point3::new(0.0, 14.0, -4.3), 0.3, material_coal.clone())));
+
+    let mut cam: Camera = Camera::new( 16.0 / 9.0, 1920, 512, 32, 70.0);
+
+    cam.look_from = Point3::new(-15.0, 10.5, -15.0);
+    cam.look_at = Point3::new(1.0, 16.0, 1.0);
+    cam.vup = Vec3::new(0.0, 1.0, 0.0);
+
+    cam.defocus_angle = 0.6;
+    cam.focus_dist = 8.0;
+
+    cam.render(&world);
+}
+
+fn render_ray_image_4() {
+
+    let mut world: HittableList = HittableList::new_empty();
+    //let material_ground = Arc::new(Lambertian::new(Color::new(0.70, 0.70, 0.9)));
+    //world.add(Arc::new(
+    //    Plane::new(Point3::new(0.0, 1.0, 0.0), Vec3::new(0.0, 0.0, 0.0), material_ground)));
+
+    let material_1 = Arc::new(Metal::new(Color::RED, 0.1));
+    let material_2 = Arc::new(Metal::new(Color::GREEN, 0.1));
+    let material_3 = Arc::new(Metal::new(Color::BLUE, 0.1));
+    let material_glass = Arc::new(Dielectric::new(1.3));
+
+    world.add(Arc::new(
+        Plane::new(Point3::new(-0.25, 1.0, 0.0), Vec3::new(1.0, 0.0, 0.0), material_1)
+    ));
+    world.add(Arc::new(
+        Plane::new(Point3::new(0.25, 1.0, 0.0), Vec3::new(-1.0, 0.0, 0.0), material_2)
+    ));
+    world.add(Arc::new(
+        Plane::new(Point3::new(0.0, 1.0, -0.25), Vec3::new(0.0, 0.0, 0.25), material_3)
+    ));
+    world.add(Arc::new(
+        Sphere::new(Point3::new(0.0, 5.0, 0.0), 3.0, material_glass.clone())
+    ));
+    world.add(Arc::new(
+        Sphere::new(Point3::new(0.0, 5.0, -7.0), 3.0, material_glass.clone())
+    ));
+    world.add(Arc::new(
+        Sphere::new(Point3::new(0.0, 5.0, -14.0), 3.0, material_glass.clone())
+    ));
+
+    let mut cam: Camera = Camera::new( 16.0 / 9.0, 1920, 512, 32, 70.0);
+
+    cam.look_from = Point3::new(-10.0, 10.0, -10.0);
     cam.look_at = Point3::new(0.0, 0.0, 0.0);
     cam.vup = Vec3::new(0.0, 1.0, 0.0);
 

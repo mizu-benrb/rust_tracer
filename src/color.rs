@@ -57,6 +57,7 @@ fn linear_to_gamma(linear_component: f64) -> f64{
     0.0
 }
 
+#[inline]
 pub fn write_color(pixel_color: &Color) {
     let mut r = if pixel_color.x() < 0.0 { 0.0 } else if pixel_color.x() > 1.0 { 1.0 } else { pixel_color.x() };
     let mut g = if pixel_color.y() < 0.0 { 0.0 } else if pixel_color.y() > 1.0 { 1.0 } else { pixel_color.y() };

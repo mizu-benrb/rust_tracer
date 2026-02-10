@@ -1,11 +1,12 @@
-﻿use crate::color::Color;
+﻿use rand::prelude::ThreadRng;
+use crate::color::Color;
 use crate::hittable::HitRecord;
 use crate::ray::Ray;
 use crate::utility::random_double;
 use crate::vectors::{dot, random_unit_vector, reflect, refract, unit_vector, Vec3};
 
 pub trait Material: Send + Sync {
-    fn scatter (&self, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)>;
+    fn scatter (&self, r_in: &Ray, rec: &HitRecord, thread_rng: &mut Option<&mut ThreadRng>) -> Option<(Color, Ray)>;
 }
 
 #[derive(Copy, Clone, Debug, Default)]
@@ -18,8 +19,8 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, _r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
-        let mut scatter_direction = rec.normal + random_unit_vector(&mut None);
+    fn scatter(&self, _r_in: &Ray, rec: &HitRecord, thread_rng: &mut Option<&mut ThreadRng>) -> Option<(Color, Ray)> {
+        let mut scatter_direction = rec.normal + random_unit_vector(thread_rng);
 
         // Catch degenerate scatter directions
         if scatter_direction.near_zero() {
@@ -43,13 +44,12 @@ impl Metal {
 }
 
 impl Material for Metal {
-    fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
+    fn scatter(&self, r_in: &Ray, rec: &HitRecord, thread_rng: &mut Option<&mut ThreadRng>) -> Option<(Color, Ray)> {
         let mut reflect_direction = reflect(r_in.direction(), &rec.normal);
-        reflect_direction = unit_vector(reflect_direction) + (self.fuzz * random_unit_vector(&mut None));
+        reflect_direction = unit_vector(reflect_direction) + (self.fuzz * random_unit_vector(thread_rng));
         let scattered = Ray::new(rec.p, reflect_direction);
-        let attenuation = self.albedo;
         if dot(scattered.direction(), &rec.normal) > 0.0 {
-            return Some((attenuation, scattered))
+            return Some((self.albedo, scattered))
         }
         None
     }
@@ -70,7 +70,7 @@ impl Dielectric {
 }
 
 impl Material for Dielectric {
-    fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
+    fn scatter(&self, r_in: &Ray, rec: &HitRecord, thread_rng: &mut Option<&mut ThreadRng>) -> Option<(Color, Ray)> {
         let attenuation = Color::new(1.0, 1.0, 1.0);
         let ri = if rec.front_face { 1.0 / self.refractive_index } else { self.refractive_index };
 
@@ -81,7 +81,7 @@ impl Material for Dielectric {
         let cannot_refract = ri * sin_theta > 1.0;
         let direction: Vec3;
 
-        if cannot_refract || Dielectric::reflectance(cos_theta, ri) > random_double(&mut None) {
+        if cannot_refract || Dielectric::reflectance(cos_theta, ri) > random_double(thread_rng) {
             direction = reflect(&unit_direction, &rec.normal);
         } else {
             direction = refract(&unit_direction, &rec.normal, ri);

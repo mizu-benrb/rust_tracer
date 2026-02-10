@@ -69,7 +69,7 @@ impl Camera {
         let image_height = self.image_height;
 
         // Change the parameter in num_threads() to allocate more threads.
-        rayon::ThreadPoolBuilder::new().num_threads(8).build_global().unwrap();
+        rayon::ThreadPoolBuilder::new().num_threads(16).build_global().unwrap();
 
         // Progress bar settings
         let progress_bar = ProgressBar::new(image_height as u64);
@@ -93,7 +93,7 @@ impl Camera {
                let mut pixel_color = Color::new(0.0, 0.0, 0.0);
                for _s in 0..self.samples_per_pixel {
                    let r = self.get_ray(x, y as u32, &mut Some(&mut thread_rng));
-                   pixel_color += self.ray_color(&r, self.max_depth, world);
+                   pixel_color += self.ray_color(&r, self.max_depth, world,&mut Some(&mut thread_rng));
                }
                pixel_color *= self.pixel_samples_scale;
                row[x as usize] = pixel_color;
@@ -175,14 +175,14 @@ impl Camera {
         self.center + (p[0] * self.defocus_disk_u) + (p[1] * self.defocus_disk_v)
     }
 
-    fn ray_color(&self, r: &Ray, depth: u32, world: &dyn Hittable) -> Color {
+    fn ray_color(&self, r: &Ray, depth: u32, world: &dyn Hittable, thread_rng: &mut Option<&mut ThreadRng>) -> Color {
         if depth <= 0 {
             return Color::new(0.0, 0.0, 0.0);
         }
 
         if let Some(temp_rec) = world.hit(r, &Interval::new(0.001, f64::INFINITY)) {
-            if let Some((attenuation, scatter)) = temp_rec.mat.scatter(r, &temp_rec) {
-                return attenuation * self.ray_color(&scatter, depth - 1, world);
+            if let Some((attenuation, scatter)) = temp_rec.mat.scatter(r, &temp_rec, thread_rng) {
+                return attenuation * self.ray_color(&scatter, depth - 1, world, thread_rng);
             }
             return Color::new(0.0, 0.0, 0.0);
         }

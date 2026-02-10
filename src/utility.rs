@@ -22,6 +22,7 @@ pub fn range_double(min: f64, max: f64, thread_rng: &mut Option<&mut ThreadRng>)
     value
 }
 
+#[inline]
 pub fn sample_square(thread_rng: &mut Option<&mut ThreadRng>) -> Vec3 {
     Vec3::new(random_double(thread_rng) - 0.5, random_double(thread_rng) - 0.5, 0.0)
 }

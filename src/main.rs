@@ -69,7 +69,58 @@ fn render_ray_image() {
     world.add(Arc::new(Sphere::new(Point3::new(-4.0, 1.0, 0.0), 1.0, material_2)));
     world.add(Arc::new(Sphere::new(Point3::new(4.0, 1.0, 0.0), 1.0, material_3)));
 
-    let mut cam: Camera = Camera::new( 16.0 / 9.0, 1200, 4, 50, 20.0);
+    let mut cam: Camera = Camera::new( 16.0 / 9.0, 1920, 16, 50, 20.0);
+
+    cam.look_from = Point3::new(13.0, 2.0, 3.0);
+    cam.look_at = Point3::new(0.0, 0.0, 0.0);
+    cam.vup = Vec3::new(0.0, 1.0, 0.0);
+
+    cam.defocus_angle = 0.6;
+    cam.focus_dist = 10.0;
+
+    cam.render(&world);
+}
+
+fn render_ray_image_2() {
+
+    let mut world: HittableList = HittableList::new_empty();
+    let material_ground = Arc::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
+    world.add(Arc::new(
+        Plane::new(Point3::new(0.0, 1.0, 0.0), Vec3::new(0.0, 0.0, 0.0), material_ground)));
+
+    for a in -11..11 {
+        for b in -11..11 {
+            let choose_material = random_double(&mut None);
+            let center = Point3::new(a as f64 + 0.9 * random_double(&mut None), 0.2, b as f64 + 0.9 * random_double(&mut None));
+
+            if (center - Point3::new(4.0, 0.2, 0.0)).length() > 0.9 {
+                let sphere_material: Arc<dyn Material> =
+                    if choose_material < 0.8 {
+                        let albedo = Color::random(&mut None) * Color::random(&mut None);
+                        Arc::new(Lambertian::new(albedo))
+                    } else if choose_material < 0.95 {
+                        let albedo = Color::random_range(0.5, 1.0, &mut None);
+                        let fuzz = range_double(0.0, 0.5, &mut None);
+                        Arc::new(Metal::new(albedo, fuzz))
+                    } else {
+                        Arc::new(Dielectric::new(1.5))
+                    };
+
+                world.add(Arc::new(Sphere::new(center, 0.2, sphere_material)));
+            }
+
+        }
+    }
+
+    let material_1 = Arc::new(Dielectric::new(1.5));
+    let material_2 = Arc::new(Lambertian::new(Color::new(0.4, 0.2, 0.1)));
+    let material_3 = Arc::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0));
+
+    world.add(Arc::new(Sphere::new(Point3::new(0.0, 1.0, 0.0), 1.0, material_1)));
+    world.add(Arc::new(Sphere::new(Point3::new(-4.0, 1.0, 0.0), 1.0, material_2)));
+    world.add(Arc::new(Sphere::new(Point3::new(4.0, 1.0, 0.0), 1.0, material_3)));
+
+    let mut cam: Camera = Camera::new( 16.0 / 9.0, 1920, 512, 50, 20.0);
 
     cam.look_from = Point3::new(13.0, 2.0, 3.0);
     cam.look_at = Point3::new(0.0, 0.0, 0.0);

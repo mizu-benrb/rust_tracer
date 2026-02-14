@@ -4,7 +4,9 @@ use rand::rngs::ThreadRng;
 use rayon::prelude::*;
 use crate::color::{write_color, Color};
 use crate::hittable::Hittable;
+use crate::image_io::create_ppm;
 use crate::interval::Interval;
+use crate::raster::output_ppm;
 use crate::ray::Ray;
 use crate::utility::{sample_square};
 use crate::vectors::{cross, random_in_unit_disk, random_on_hemisphere, random_unit_vector, unit_vector, Point3, Vec3};
@@ -82,7 +84,7 @@ impl Camera {
 
         // Render
         // PPM file settings
-        println!("P3\n{image_width} {image_height}\n255");
+        // println!("P3\n{image_width} {image_height}\n255");
 
         let mut image_buffer = vec![Color::BLACK; (image_height * image_width) as usize];
 
@@ -102,9 +104,7 @@ impl Camera {
            progress_bar.inc(1);
         });
 
-        for c in image_buffer {
-            write_color(&c);
-        }
+        create_ppm(&image_buffer, image_width, image_height, "test_img").expect("TODO: panic message");
 
         eprintln!("{} ms", now.elapsed().as_millis());
     }

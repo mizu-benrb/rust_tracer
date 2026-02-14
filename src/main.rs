@@ -8,6 +8,7 @@ mod interval;
 mod camera;
 mod utility;
 mod material;
+mod image_io;
 
 use std::sync::Arc;
 use std::f64::consts::*;
@@ -27,7 +28,7 @@ const PHI: f64 = 1.618033988749894;
 
 fn main() {
     // HW 2
-    render_ray_image_4();
+    render_ray_image_3();
 }
 
 fn render_ray_image() {
@@ -156,7 +157,7 @@ fn render_ray_image_3() {
     world.add(Arc::new(
         Sphere::new(Point3::new(0.0, 14.0, -4.3), 0.3, material_coal.clone())));
 
-    let mut cam: Camera = Camera::new( 16.0 / 9.0, 1920, 512, 32, 70.0);
+    let mut cam: Camera = Camera::new( 16.0 / 9.0, 960, 128, 32, 70.0);
 
     cam.look_from = Point3::new(-15.0, 10.5, -15.0);
     cam.look_at = Point3::new(1.0, 16.0, 1.0);

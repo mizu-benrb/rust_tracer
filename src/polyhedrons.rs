@@ -7,21 +7,27 @@ use crate::vectors::*;
 
 #[derive(Clone)]
 pub struct Sphere {
-    center: Vec3,
+    center: Ray,
     radius: f64,
     mat: Arc<dyn Material>,
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, radius: f64, mat: Arc<dyn Material>) -> Self { Self { center, radius: radius.max(0.0), mat } }
+    pub fn new(static_center: Vec3, radius: f64, mat: Arc<dyn Material>) -> Self {
+        Self { center: Ray::new(static_center, Vec3::ZERO), radius: radius.max(0.0), mat }
+    }
+
+    pub fn new_moving(center1: Vec3, center2: Vec3, radius: f64, mat: Arc<dyn Material>) -> Self {
+        Self { center: Ray::new(center1, center2 - center1), radius: radius.max(0.0), mat }
+    }
 }
 
 impl Hittable for Sphere {
     fn hit(&self, r: &Ray, ray_t: &Interval) -> Option<HitRecord> {
-        let center = self.center;
+        let current_center = self.center.at(r.tm());
         let radius = self.radius;
 
-        let oc = center - *r.origin(); // Potential bug: Flip center and r.origin if encountered
+        let oc = current_center - *r.origin(); // Potential bug: Flip center and r.origin if encountered
         let a = r.direction().length_squared();
         let h = dot(&oc, &r.direction());
         let c = oc.length_squared() - radius.powi(2);
@@ -46,7 +52,7 @@ impl Hittable for Sphere {
             t: root,
             p: r.at(root),
             mat: self.mat.clone(),
-            normal: (r.at(root) - center) / radius,
+            normal: (r.at(root) - current_center) / radius,
             front_face: true,
         };
         let outward_normal = hit_record.normal;

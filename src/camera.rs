@@ -8,7 +8,7 @@ use crate::hittable::Hittable;
 use crate::image_io::create_ppm;
 use crate::interval::Interval;
 use crate::ray::Ray;
-use crate::utility::{sample_square};
+use crate::utility::{random_double, random_double_unseeded, sample_square};
 use crate::vectors::{cross, random_in_unit_disk, unit_vector, Point3, Vec3};
 
 pub struct Camera {
@@ -166,8 +166,9 @@ impl Camera {
 
         let ray_origin = if self.defocus_angle <= 0.0 { self.center } else { self.defocus_disk_sample(rng) };
         let ray_direction = pixel_sample - ray_origin;
+        let ray_time = random_double(rng);
 
-        Ray::new(ray_origin, ray_direction)
+        Ray::new_t(ray_origin, ray_direction, ray_time)
     }
 
     fn defocus_disk_sample(&self, rng: &mut Xoshiro256PlusPlus) -> Point3 {

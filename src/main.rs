@@ -56,8 +56,14 @@ fn render_ray_image() {
                     } else {
                         Arc::new(Dielectric::new(1.5))
                     };
+                let center2 =
+                    if choose_material < 0.8 {
+                        center + Vec3::new(0.0, range_double_unseeded(0.0, 0.5), 0.0)
+                    } else {
+                        center
+                    };
 
-                world.add(Arc::new(Sphere::new(center, 0.2, sphere_material)));
+                world.add(Arc::new(Sphere::new_moving(center, center2, 0.2, sphere_material)));
             }
 
         }
@@ -71,7 +77,7 @@ fn render_ray_image() {
     world.add(Arc::new(Sphere::new(Point3::new(-4.0, 1.0, 0.0), 1.0, material_2)));
     world.add(Arc::new(Sphere::new(Point3::new(4.0, 1.0, 0.0), 1.0, material_3)));
 
-    let mut cam: Camera = Camera::new( 16.0 / 9.0, 1920, 512, 32, 20.0);
+    let mut cam: Camera = Camera::new( 16.0 / 9.0, 480, 128, 32, 20.0);
 
     cam.look_from = Point3::new(13.0, 2.0, 3.0);
     cam.look_at = Point3::new(0.0, 0.0, 0.0);

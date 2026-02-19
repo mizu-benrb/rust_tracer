@@ -1,5 +1,5 @@
 ﻿use rand::prelude::ThreadRng;
-use rand::Rng;
+use rand::{Rng};
 use crate::vectors::Vec3;
 
 // Utility functions for random number generation

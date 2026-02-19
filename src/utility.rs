@@ -1,29 +1,30 @@
 ﻿use rand::prelude::ThreadRng;
 use rand::rngs::Xoshiro256PlusPlus;
-use rand::{RngExt, SeedableRng};
+use rand::{Rng, RngExt};
 use crate::vectors::Vec3;
 
 // Utility functions for random number generation
 #[inline]
-pub fn random_double(rng: &mut Option<&mut Xoshiro256PlusPlus>) -> f64 {
-    let rng = match rng {
-        None => { &mut Xoshiro256PlusPlus::from_rng(&mut rand::rng()) }
-        Some(value) => { value }
-    };
+pub fn random_double(rng: &mut Xoshiro256PlusPlus) -> f64 {
     let value: f64 = rng.random();
     value
 }
 #[inline]
-pub fn range_double(min: f64, max: f64, rng: &mut Option<&mut Xoshiro256PlusPlus>) -> f64 {
-    let rng = match rng {
-        None => { &mut Xoshiro256PlusPlus::from_rng(&mut rand::rng()) }
-        Some(value) => { value }
-    };
+pub fn random_double_unseeded() -> f64 {
+    let value: f64 = rand::rng().random();
+    value
+}
+#[inline]
+pub fn range_double(min: f64, max: f64, rng: &mut Xoshiro256PlusPlus) -> f64 {
     let value: f64 = min + (max-min) * rng.random::<f64>();
     value
 }
-
 #[inline]
-pub fn sample_square(rng: &mut Option<&mut Xoshiro256PlusPlus>) -> Vec3 {
+pub fn range_double_unseeded(min: f64, max: f64) -> f64 {
+    let value: f64 = min + (max-min) * rand::rng().random::<f64>();
+    value
+}
+#[inline]
+pub fn sample_square(rng: &mut Xoshiro256PlusPlus) -> Vec3 {
     Vec3::new(random_double(rng) - 0.5, random_double(rng) - 0.5, 0.0)
 }

@@ -1,7 +1,7 @@
 ﻿use std::ops;
 use std::fmt;
 use rand::rngs::{ThreadRng, Xoshiro256PlusPlus};
-use crate::utility::{random_double, range_double};
+use crate::utility::{random_double, random_double_unseeded, range_double, range_double_unseeded};
 
 // Struct definition for different dimension vectors
 #[derive(Copy, Clone, Debug)]
@@ -81,12 +81,20 @@ impl Vec3 {
         (self.x().abs() < s) && (self.y().abs() < s) && (self.z().abs() < s)
     }
 
-    pub fn random(rng: &mut Option<&mut Xoshiro256PlusPlus>) -> Vec3 {
+    pub fn random(rng: &mut Xoshiro256PlusPlus) -> Vec3 {
         Vec3::new(random_double(rng), random_double(rng), random_double(rng))
     }
 
-    pub fn random_range(min: f64, max: f64, rng: &mut Option<&mut Xoshiro256PlusPlus>) -> Vec3 {
+    pub fn random_unseeded() -> Vec3 {
+        Vec3::new(random_double_unseeded(), random_double_unseeded(), random_double_unseeded())
+    }
+
+    pub fn random_range(min: f64, max: f64, rng: &mut Xoshiro256PlusPlus) -> Vec3 {
         Vec3::new(range_double(min, max, rng), range_double(min, max, rng), range_double(min, max, rng))
+    }
+    
+    pub fn random_range_unseeded(min: f64, max: f64) -> Vec3 {
+        Vec3::new(range_double_unseeded(min, max), range_double_unseeded(min, max), range_double_unseeded(min, max))
     }
     
     pub const ZERO: Vec3 = Vec3 { e: [0.0, 0.0, 0.0] };
@@ -221,7 +229,7 @@ pub fn unit_vector(v: Vec3) -> Vec3 {
 }
 
 #[inline]
-pub fn random_in_unit_disk(rng: &mut Option<&mut Xoshiro256PlusPlus>) -> Vec3 {
+pub fn random_in_unit_disk(rng: &mut Xoshiro256PlusPlus) -> Vec3 {
     loop {
         let p = Vec3::new(range_double(-1.0, 1.0, rng), range_double(-1.0, 1.0, rng), 0.0);
         if p.length_squared() < 1.0 {
@@ -231,7 +239,7 @@ pub fn random_in_unit_disk(rng: &mut Option<&mut Xoshiro256PlusPlus>) -> Vec3 {
 }
 
 #[inline]
-pub fn random_unit_vector(rng: &mut Option<&mut Xoshiro256PlusPlus>) -> Vec3 {
+pub fn random_unit_vector(rng: &mut Xoshiro256PlusPlus) -> Vec3 {
     // EVISCERATE THIS AND REPLACE WITH SOMETHING BETTER
     loop {
         let p = Vec3::random_range(-1.0, 1.0, rng);
@@ -243,7 +251,7 @@ pub fn random_unit_vector(rng: &mut Option<&mut Xoshiro256PlusPlus>) -> Vec3 {
 }
 
 #[inline]
-pub fn random_on_hemisphere(normal: &Vec3, rng: &mut Option<&mut Xoshiro256PlusPlus>) -> Vec3 {
+pub fn random_on_hemisphere(normal: &Vec3, rng: &mut Xoshiro256PlusPlus) -> Vec3 {
     let on_unit_sphere = random_unit_vector(rng);
     if dot(&on_unit_sphere, &normal) > 0.0 {
         on_unit_sphere

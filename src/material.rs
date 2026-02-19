@@ -1,4 +1,5 @@
 ﻿use rand::prelude::ThreadRng;
+use rand::Rng;
 use rand::rngs::Xoshiro256PlusPlus;
 use crate::color::Color;
 use crate::hittable::HitRecord;
@@ -7,7 +8,7 @@ use crate::utility::random_double;
 use crate::vectors::{dot, random_unit_vector, reflect, refract, unit_vector, Vec3};
 
 pub trait Material: Send + Sync {
-    fn scatter (&self, r_in: &Ray, rec: &HitRecord, rng: &mut Option<&mut Xoshiro256PlusPlus>) -> Option<(Color, Ray)>;
+    fn scatter (&self, r_in: &Ray, rec: &HitRecord, rng: &mut Xoshiro256PlusPlus) -> Option<(Color, Ray)>;
 }
 
 #[derive(Copy, Clone, Debug, Default)]
@@ -20,7 +21,7 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, _r_in: &Ray, rec: &HitRecord, rng: &mut Option<&mut Xoshiro256PlusPlus>) -> Option<(Color, Ray)> {
+    fn scatter(&self, _r_in: &Ray, rec: &HitRecord, rng: &mut Xoshiro256PlusPlus) -> Option<(Color, Ray)> {
         let mut scatter_direction = rec.normal + random_unit_vector(rng);
 
         // Catch degenerate scatter directions
@@ -45,7 +46,7 @@ impl Metal {
 }
 
 impl Material for Metal {
-    fn scatter(&self, r_in: &Ray, rec: &HitRecord, rng: &mut Option<&mut Xoshiro256PlusPlus>) -> Option<(Color, Ray)> {
+    fn scatter(&self, r_in: &Ray, rec: &HitRecord, rng: &mut Xoshiro256PlusPlus) -> Option<(Color, Ray)> {
         let mut reflect_direction = reflect(r_in.direction(), &rec.normal);
         reflect_direction = unit_vector(reflect_direction) + (self.fuzz * random_unit_vector(rng));
         let scattered = Ray::new(rec.p, reflect_direction);
@@ -71,7 +72,7 @@ impl Dielectric {
 }
 
 impl Material for Dielectric {
-    fn scatter(&self, r_in: &Ray, rec: &HitRecord, rng: &mut Option<&mut Xoshiro256PlusPlus>) -> Option<(Color, Ray)> {
+    fn scatter(&self, r_in: &Ray, rec: &HitRecord, rng: &mut Xoshiro256PlusPlus) -> Option<(Color, Ray)> {
         let attenuation = Color::new(1.0, 1.0, 1.0);
         let ri = if rec.front_face { 1.0 / self.refractive_index } else { self.refractive_index };
 

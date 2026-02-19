@@ -13,6 +13,7 @@ mod image_io;
 use std::sync::Arc;
 use std::f64::consts::*;
 use indicatif::{ProgressBar, ProgressStyle};
+use rand::rngs::Xoshiro256PlusPlus;
 use crate::camera::Camera;
 use crate::vectors::*;
 use crate::color::*;
@@ -22,7 +23,7 @@ use crate::polyhedrons::*;
 use crate::hittable::*;
 use crate::interval::Interval;
 use crate::material::{Dielectric, Lambertian, Material, Metal};
-use crate::utility::{random_double, range_double};
+use crate::utility::{random_double, random_double_unseeded, range_double, range_double_unseeded};
 
 const PHI: f64 = 1.618033988749894;
 
@@ -40,17 +41,17 @@ fn render_ray_image() {
 
     for a in -11..11 {
         for b in -11..11 {
-            let choose_material = random_double(&mut None);
-            let center = Point3::new(a as f64 + 0.9 * random_double(&mut None), 0.2, b as f64 + 0.9 * random_double(&mut None));
+            let choose_material = random_double_unseeded();
+            let center = Point3::new(a as f64 + 0.9 * random_double_unseeded(), 0.2, b as f64 + 0.9 * random_double_unseeded());
 
             if (center - Point3::new(4.0, 0.2, 0.0)).length() > 0.9 {
                 let sphere_material: Arc<dyn Material> =
                     if choose_material < 0.8 {
-                        let albedo = Color::random(&mut None) * Color::random(&mut None);
+                        let albedo = Color::random_unseeded() * Color::random_unseeded();
                         Arc::new(Lambertian::new(albedo))
                     } else if choose_material < 0.95 {
-                        let albedo = Color::random_range(0.5, 1.0, &mut None);
-                        let fuzz = range_double(0.0, 0.5, &mut None);
+                        let albedo = Color::random_range_unseeded(0.5, 1.0);
+                        let fuzz = range_double_unseeded(0.0, 0.5);
                         Arc::new(Metal::new(albedo, fuzz))
                     } else {
                         Arc::new(Dielectric::new(1.5))

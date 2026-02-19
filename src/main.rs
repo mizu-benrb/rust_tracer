@@ -28,7 +28,7 @@ const PHI: f64 = 1.618033988749894;
 
 fn main() {
     // HW 2
-    render_ray_image_3();
+    render_ray_image_2();
 }
 
 fn render_ray_image() {
@@ -70,7 +70,7 @@ fn render_ray_image() {
     world.add(Arc::new(Sphere::new(Point3::new(-4.0, 1.0, 0.0), 1.0, material_2)));
     world.add(Arc::new(Sphere::new(Point3::new(4.0, 1.0, 0.0), 1.0, material_3)));
 
-    let mut cam: Camera = Camera::new( 16.0 / 9.0, 1920, 16, 50, 20.0);
+    let mut cam: Camera = Camera::new( 16.0 / 9.0, 1920, 512, 32, 20.0);
 
     cam.look_from = Point3::new(13.0, 2.0, 3.0);
     cam.look_at = Point3::new(0.0, 0.0, 0.0);

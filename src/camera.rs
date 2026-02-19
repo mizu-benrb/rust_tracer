@@ -1,15 +1,15 @@
 ﻿use std::time::Instant;
 use indicatif::{ProgressBar, ProgressStyle};
-use rand::rngs::ThreadRng;
+use rand::rngs::{Xoshiro256PlusPlus};
+use rand::SeedableRng;
 use rayon::prelude::*;
-use crate::color::{write_color, Color};
+use crate::color::{Color};
 use crate::hittable::Hittable;
 use crate::image_io::create_ppm;
 use crate::interval::Interval;
-use crate::raster::output_ppm;
 use crate::ray::Ray;
 use crate::utility::{sample_square};
-use crate::vectors::{cross, random_in_unit_disk, random_on_hemisphere, random_unit_vector, unit_vector, Point3, Vec3};
+use crate::vectors::{cross, random_in_unit_disk, unit_vector, Point3, Vec3};
 
 pub struct Camera {
     pub aspect_ratio: f64,
@@ -89,13 +89,11 @@ impl Camera {
         let mut image_buffer = vec![Color::BLACK; (image_height * image_width) as usize];
 
         image_buffer.par_chunks_mut(image_width as usize).enumerate().for_each(|(y, row)| {
-            let mut thread_rng = rand::rng();
-
            for x in 0..image_width {
                let mut pixel_color = Color::new(0.0, 0.0, 0.0);
                for _s in 0..self.samples_per_pixel {
-                   let r = self.get_ray(x, y as u32, &mut Some(&mut thread_rng));
-                   pixel_color += self.ray_color(&r, self.max_depth, world,&mut Some(&mut thread_rng));
+                   let r = self.get_ray(x, y as u32, &mut Some(Xoshiro256PlusPlus::from_rng(&mut rand::rng())));
+                   pixel_color += self.ray_color(&r, self.max_depth, world,&mut Some(Xoshiro256PlusPlus::from_rng(&mut rand::rng())));
                }
                pixel_color *= self.pixel_samples_scale;
                row[x as usize] = pixel_color;
@@ -158,31 +156,31 @@ impl Camera {
     ///
     /// # Returns
     /// A ray pointed at a spot in world space randomly sampled around pixel location i, j
-    fn get_ray(&self, i: u32, j: u32, thread_rng: &mut Option<&mut ThreadRng>) -> Ray {
-        let offset = sample_square(thread_rng);
+    fn get_ray(&self, i: u32, j: u32, rng: &mut Option<Xoshiro256PlusPlus>) -> Ray {
+        let offset = sample_square(rng);
         let pixel_sample = self.pixel100_loc
                                 + ((i as f64 + offset.x()) * self.pixel_delta_u)
                                 + ((j as f64 + offset.y()) * self.pixel_delta_v);
 
-        let ray_origin = if self.defocus_angle <= 0.0 { self.center } else { self.defocus_disk_sample(thread_rng) };
+        let ray_origin = if self.defocus_angle <= 0.0 { self.center } else { self.defocus_disk_sample(rng) };
         let ray_direction = pixel_sample - ray_origin;
 
         Ray::new(ray_origin, ray_direction)
     }
 
-    fn defocus_disk_sample(&self, thread_rng: &mut Option<&mut ThreadRng>) -> Point3 {
-        let p = random_in_unit_disk(thread_rng);
+    fn defocus_disk_sample(&self, rng: &mut Option<Xoshiro256PlusPlus>) -> Point3 {
+        let p = random_in_unit_disk(rng);
         self.center + (p[0] * self.defocus_disk_u) + (p[1] * self.defocus_disk_v)
     }
 
-    fn ray_color(&self, r: &Ray, depth: u32, world: &dyn Hittable, thread_rng: &mut Option<&mut ThreadRng>) -> Color {
+    fn ray_color(&self, r: &Ray, depth: u32, world: &dyn Hittable, rng: &mut Option<Xoshiro256PlusPlus>) -> Color {
         if depth <= 0 {
             return Color::new(0.0, 0.0, 0.0);
         }
 
         if let Some(temp_rec) = world.hit(r, &Interval::new(0.001, f64::INFINITY)) {
-            if let Some((attenuation, scatter)) = temp_rec.mat.scatter(r, &temp_rec, thread_rng) {
-                return attenuation * self.ray_color(&scatter, depth - 1, world, thread_rng);
+            if let Some((attenuation, scatter)) = temp_rec.mat.scatter(r, &temp_rec, rng) {
+                return attenuation * self.ray_color(&scatter, depth - 1, world, rng);
             }
             return Color::new(0.0, 0.0, 0.0);
         }

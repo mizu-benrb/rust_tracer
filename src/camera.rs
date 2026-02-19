@@ -89,11 +89,13 @@ impl Camera {
         let mut image_buffer = vec![Color::BLACK; (image_height * image_width) as usize];
 
         image_buffer.par_chunks_mut(image_width as usize).enumerate().for_each(|(y, row)| {
+            let mut rng = Xoshiro256PlusPlus::from_rng(&mut rand::rng());
+
            for x in 0..image_width {
                let mut pixel_color = Color::new(0.0, 0.0, 0.0);
                for _s in 0..self.samples_per_pixel {
-                   let r = self.get_ray(x, y as u32, &mut Some(Xoshiro256PlusPlus::from_rng(&mut rand::rng())));
-                   pixel_color += self.ray_color(&r, self.max_depth, world,&mut Some(Xoshiro256PlusPlus::from_rng(&mut rand::rng())));
+                   let r = self.get_ray(x, y as u32, &mut Some(&mut rng));
+                   pixel_color += self.ray_color(&r, self.max_depth, world,&mut Some(&mut rng));
                }
                pixel_color *= self.pixel_samples_scale;
                row[x as usize] = pixel_color;
@@ -156,7 +158,7 @@ impl Camera {
     ///
     /// # Returns
     /// A ray pointed at a spot in world space randomly sampled around pixel location i, j
-    fn get_ray(&self, i: u32, j: u32, rng: &mut Option<Xoshiro256PlusPlus>) -> Ray {
+    fn get_ray(&self, i: u32, j: u32, rng: &mut Option<&mut Xoshiro256PlusPlus>) -> Ray {
         let offset = sample_square(rng);
         let pixel_sample = self.pixel100_loc
                                 + ((i as f64 + offset.x()) * self.pixel_delta_u)
@@ -168,12 +170,12 @@ impl Camera {
         Ray::new(ray_origin, ray_direction)
     }
 
-    fn defocus_disk_sample(&self, rng: &mut Option<Xoshiro256PlusPlus>) -> Point3 {
+    fn defocus_disk_sample(&self, rng: &mut Option<&mut Xoshiro256PlusPlus>) -> Point3 {
         let p = random_in_unit_disk(rng);
         self.center + (p[0] * self.defocus_disk_u) + (p[1] * self.defocus_disk_v)
     }
 
-    fn ray_color(&self, r: &Ray, depth: u32, world: &dyn Hittable, rng: &mut Option<Xoshiro256PlusPlus>) -> Color {
+    fn ray_color(&self, r: &Ray, depth: u32, world: &dyn Hittable, rng: &mut Option<&mut Xoshiro256PlusPlus>) -> Color {
         if depth <= 0 {
             return Color::new(0.0, 0.0, 0.0);
         }

@@ -5,7 +5,7 @@ use crate::vectors::Vec3;
 
 // Utility functions for random number generation
 #[inline]
-pub fn random_double(rng: &mut Option<Xoshiro256PlusPlus>) -> f64 {
+pub fn random_double(rng: &mut Option<&mut Xoshiro256PlusPlus>) -> f64 {
     let rng = match rng {
         None => { &mut Xoshiro256PlusPlus::from_rng(&mut rand::rng()) }
         Some(value) => { value }
@@ -14,7 +14,7 @@ pub fn random_double(rng: &mut Option<Xoshiro256PlusPlus>) -> f64 {
     value
 }
 #[inline]
-pub fn range_double(min: f64, max: f64, rng: &mut Option<Xoshiro256PlusPlus>) -> f64 {
+pub fn range_double(min: f64, max: f64, rng: &mut Option<&mut Xoshiro256PlusPlus>) -> f64 {
     let rng = match rng {
         None => { &mut Xoshiro256PlusPlus::from_rng(&mut rand::rng()) }
         Some(value) => { value }
@@ -24,6 +24,6 @@ pub fn range_double(min: f64, max: f64, rng: &mut Option<Xoshiro256PlusPlus>) ->
 }
 
 #[inline]
-pub fn sample_square(rng: &mut Option<Xoshiro256PlusPlus>) -> Vec3 {
+pub fn sample_square(rng: &mut Option<&mut Xoshiro256PlusPlus>) -> Vec3 {
     Vec3::new(random_double(rng) - 0.5, random_double(rng) - 0.5, 0.0)
 }

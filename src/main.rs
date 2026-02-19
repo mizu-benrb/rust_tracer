@@ -28,7 +28,7 @@ const PHI: f64 = 1.618033988749894;
 
 fn main() {
     // HW 2
-    render_ray_image_2();
+    render_ray_image();
 }
 
 fn render_ray_image() {

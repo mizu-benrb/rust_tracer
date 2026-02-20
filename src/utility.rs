@@ -31,7 +31,7 @@ pub fn range_int(min: i32, max: i32, rng: &mut Xoshiro256PlusPlus) -> i32 {
 }
 #[inline]
 pub fn range_int_unseeded(min: i32, max: i32) -> i32 {
-    rand::rng().random_range(min..max)
+    rand::rng().random_range(min..max+1)
 }
 
 #[inline]

@@ -81,6 +81,10 @@ impl Hittable for Sphere {
 
         Some(hit_record)
     }
+
+    fn bounding_box(&self) -> AABB {
+        self.bbox.clone()
+    }
 }
 
 pub struct Plane {

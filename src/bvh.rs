@@ -15,9 +15,10 @@ impl Hittable for BvhNode {
     fn hit(&self, ray: &Ray, ray_t: Interval) -> Option<HitRecord> {
         if let Some(interval) = self.bbox.hit(ray, ray_t) {
             let hit_left = self.left.hit(ray, interval);
-            let hit_right = self.right.hit(ray, interval);
+            let hit_right = self.right.hit(
+                ray, Interval::new(ray_t.min, if hit_left.is_some() { hit_left.as_ref()?.t } else { ray_t.max }));
 
-            hit_left.or(hit_right)
+            hit_right.or(hit_left)
         } else {
             None
         }
@@ -28,7 +29,7 @@ impl Hittable for BvhNode {
 
 impl BvhNode {
     pub fn new(objects: &mut [Arc<dyn Hittable>]) -> Self {
-        let axis = range_int_unseeded(0, 3);
+        let axis = range_int_unseeded(0, 2);
         let object_span = objects.len();
 
         let (left, right): (Arc<dyn Hittable>, Arc<dyn Hittable>) = match object_span {

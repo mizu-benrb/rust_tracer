@@ -11,7 +11,6 @@ mod material;
 mod image_io;
 mod aabb;
 mod bvh;
-mod test;
 
 use std::sync::Arc;
 use std::f64::consts::*;
@@ -40,8 +39,9 @@ fn render_ray_image() {
 
     let mut world: HittableList = HittableList::new_empty();
     let material_ground = Arc::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
-    world.add(Arc::new(
-        Plane::new(Point3::new(0.0, 1.0, 0.0), Vec3::new(0.0, 0.0, 0.0), material_ground)));
+    //world.add(Arc::new(
+    //    Plane::new(Point3::new(0.0, 1.0, 0.0), Vec3::new(0.0, 0.0, 0.0), material_ground)));
+    world.add(Arc::new(Sphere::new(Point3::new(0.0,-1000.0,0.0), 1000.0, material_ground)));
 
     for a in -11..11 {
         for b in -11..11 {
@@ -62,7 +62,7 @@ fn render_ray_image() {
                     };
                 let center2 =
                     if choose_material < 0.8 {
-                        center + Vec3::new(0.0, range_double_unseeded(0.0, 0.5), 0.0)
+                        center + Vec3::new(0.0, range_double_unseeded(0.0, 0.0), 0.0)
                     } else {
                         center
                     };
@@ -83,7 +83,7 @@ fn render_ray_image() {
 
     let bvh_test = HittableList::new(Arc::new(BvhNode::new_from_hittable_list(&mut world)));
 
-    let mut cam: Camera = Camera::new( 16.0 / 9.0, 480, 128, 32, 20.0);
+    let mut cam: Camera = Camera::new( 16.0 / 9.0, 1920, 512, 32, 20.0);
 
     cam.look_from = Point3::new(13.0, 2.0, 3.0);
     cam.look_at = Point3::new(0.0, 0.0, 0.0);
@@ -92,7 +92,7 @@ fn render_ray_image() {
     cam.defocus_angle = 0.6;
     cam.focus_dist = 10.0;
 
-    cam.render(&world);
+    cam.render(&bvh_test);
 }
 
 fn render_ray_image_2() {

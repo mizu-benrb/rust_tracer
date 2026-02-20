@@ -181,7 +181,7 @@ impl Camera {
             return Color::new(0.0, 0.0, 0.0);
         }
 
-        if let Some(temp_rec) = world.hit(r, &Interval::new(0.001, f64::INFINITY)) {
+        if let Some(temp_rec) = world.hit(r, Interval::new(0.001, f64::INFINITY)) {
             if let Some((attenuation, scatter)) = temp_rec.mat.scatter(r, &temp_rec, rng) {
                 return attenuation * self.ray_color(&scatter, depth - 1, world, rng);
             }

@@ -3,6 +3,7 @@ use crate::ray::*;
 use crate::vectors::*;
 use crate::interval::*;
 use crate::material::Material;
+use crate::aabb::AABB;
 
 #[derive(Clone)]
 pub struct HitRecord {
@@ -23,28 +24,39 @@ impl HitRecord {
 }
 
 pub trait Hittable: Sync + Send {
-    fn hit(&self, ray: &Ray, ray_t: &Interval) -> Option<HitRecord> { None }
+    fn hit(&self, ray: &Ray, ray_t: Interval) -> Option<HitRecord> { None }
+    fn bounding_box(&self) -> AABB { AABB::default() }
 }
 
 pub struct HittableList {
-    pub objects: Vec<Arc<dyn Hittable>>
+    pub objects: Vec<Arc<dyn Hittable>>, // Bounded objects
+    bbox: AABB,
 }
 
 impl HittableList {
-    pub fn new_empty() -> HittableList { HittableList { objects: Vec::new() } }
-    pub fn new(h: Arc<dyn Hittable>) -> HittableList { HittableList { objects: vec![h] } }
+    pub fn new_empty() -> HittableList { HittableList { objects: Vec::new(), bbox: AABB::default() } }
+    pub fn new(h: Arc<dyn Hittable>) -> HittableList {
+        let temp_box = h.bounding_box();
+        HittableList {
+            objects: vec![h],
+            bbox: temp_box,
+        }
+    }
 
-    pub fn add(&mut self, h: Arc<dyn Hittable>) { self.objects.push(h); }
+    pub fn add(&mut self, h: Arc<dyn Hittable>) {
+        self.bbox = self.bbox.combine(&h.bounding_box());
+        self.objects.push(h);
+    }
     pub fn clear(&mut self) { self.objects.clear(); }
 }
 
 impl Hittable for HittableList {
-    fn hit(&self, ray: &Ray, ray_t: &Interval) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, ray_t: Interval) -> Option<HitRecord> {
         let mut hit_record = None;
         let mut closest_so_far = ray_t.max;
 
         for object in &self.objects {
-            if let Some(temp_rec) =  object.hit(ray, &Interval::new(ray_t.min, closest_so_far)) {
+            if let Some(temp_rec) =  object.hit(ray, Interval::new(ray_t.min, closest_so_far)) {
                 closest_so_far = temp_rec.t;
                 hit_record = Some(temp_rec);
             }
@@ -52,4 +64,6 @@ impl Hittable for HittableList {
 
         hit_record
     }
+
+    fn bounding_box(&self) -> AABB { self.bbox.clone() }
 }

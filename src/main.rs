@@ -9,11 +9,15 @@ mod camera;
 mod utility;
 mod material;
 mod image_io;
+mod aabb;
+mod bvh;
+mod test;
 
 use std::sync::Arc;
 use std::f64::consts::*;
 use indicatif::{ProgressBar, ProgressStyle};
 use rand::rngs::Xoshiro256PlusPlus;
+use crate::bvh::BvhNode;
 use crate::camera::Camera;
 use crate::vectors::*;
 use crate::color::*;
@@ -76,6 +80,8 @@ fn render_ray_image() {
     world.add(Arc::new(Sphere::new(Point3::new(0.0, 1.0, 0.0), 1.0, material_1)));
     world.add(Arc::new(Sphere::new(Point3::new(-4.0, 1.0, 0.0), 1.0, material_2)));
     world.add(Arc::new(Sphere::new(Point3::new(4.0, 1.0, 0.0), 1.0, material_3)));
+
+    let bvh_test = HittableList::new(Arc::new(BvhNode::new_from_hittable_list(&mut world)));
 
     let mut cam: Camera = Camera::new( 16.0 / 9.0, 480, 128, 32, 20.0);
 

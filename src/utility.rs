@@ -24,6 +24,16 @@ pub fn range_double_unseeded(min: f64, max: f64) -> f64 {
     let value: f64 = min + (max-min) * rand::rng().random::<f64>();
     value
 }
+
+#[inline]
+pub fn range_int(min: i32, max: i32, rng: &mut Xoshiro256PlusPlus) -> i32 {
+    rng.random_range(min..max)
+}
+#[inline]
+pub fn range_int_unseeded(min: i32, max: i32) -> i32 {
+    rand::rng().random_range(min..max)
+}
+
 #[inline]
 pub fn sample_square(rng: &mut Xoshiro256PlusPlus) -> Vec3 {
     Vec3::new(random_double(rng) - 0.5, random_double(rng) - 0.5, 0.0)

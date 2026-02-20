@@ -15,6 +15,13 @@ impl Interval {
         Self { min, max }
     }
 
+    pub fn combine(&self, other: &Interval) -> Interval {
+        let min = if self.min <= other.min { self.min } else { other.min };
+        let max = if self.max >= other.max { self.max } else { other.max };
+
+        Interval { min, max }
+    }
+
     pub fn size(&self) -> f64 {
         self.max - self.min
     }
@@ -39,6 +46,10 @@ impl Interval {
     pub fn expand(&self, delta: f64) -> Interval {
         let padding = delta / 2.0;
         Interval::new(self.min - padding, self.max + padding)
+    }
+    
+    pub fn is_default(&self) -> bool {
+        self.min == f64::INFINITY && self.max == f64::NEG_INFINITY
     }
 
     pub const EMPTY: Interval = Interval { min: f64::INFINITY, max: f64::NEG_INFINITY };

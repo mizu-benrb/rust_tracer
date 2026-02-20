@@ -30,7 +30,7 @@ impl AABB {
         AABB { x, y, z }
     }
 
-    pub fn axis_interval(&self, n: i32) -> Interval {
+    pub fn axis_interval(&self, n: usize) -> Interval {
         if n == 1 {
             return self.y
         } else if n == 2 {
@@ -66,8 +66,18 @@ impl AABB {
         Some(new_interval)
     }
 
+    pub fn longest_axis(&self) -> usize {
+        if self.x.size() > self.y.size() {
+            if self.x.size() > self.z.size() { 0 } else { 2 }
+        } else {
+            if self.y.size() > self.z.size() { 1 } else { 2 }
+        }
+    }
+
     pub fn is_default(&self) -> bool {
         self.x.is_default() && self.y.is_default() && self.z.is_default()
     }
 
+    pub const EMPTY: AABB = AABB { x: Interval::EMPTY, y: Interval::EMPTY, z: Interval::EMPTY };
+    pub const UNIVERSE: AABB = AABB { x: Interval::UNIVERSE, y: Interval::UNIVERSE, z: Interval::UNIVERSE };
 }

@@ -3,7 +3,6 @@ use crate::aabb::AABB;
 use crate::hittable::{HitRecord, Hittable, HittableList};
 use crate::interval::Interval;
 use crate::ray::Ray;
-use crate::utility::range_int_unseeded;
 
 pub struct BvhNode {
     left: Arc<dyn Hittable>,
@@ -29,8 +28,14 @@ impl Hittable for BvhNode {
 
 impl BvhNode {
     pub fn new(objects: &mut [Arc<dyn Hittable>]) -> Self {
-        let axis = range_int_unseeded(0, 2);
         let object_span = objects.len();
+
+        let mut bbox = AABB::EMPTY;
+        for object in objects.iter_mut() {
+            bbox = bbox.combine(&object.bounding_box());
+        }
+
+        let axis = bbox.longest_axis();
 
         let (left, right): (Arc<dyn Hittable>, Arc<dyn Hittable>) = match object_span {
             1 => (objects[0].clone(), objects[0].clone()),
@@ -50,8 +55,6 @@ impl BvhNode {
                 )
             }
         };
-
-        let bbox = left.bounding_box().combine(&right.bounding_box());
 
         BvhNode { left, right, bbox }
     }

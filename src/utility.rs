@@ -1,6 +1,5 @@
-﻿use rand::prelude::ThreadRng;
-use rand::rngs::Xoshiro256PlusPlus;
-use rand::{Rng, RngExt};
+﻿use rand::rngs::Xoshiro256PlusPlus;
+use rand::RngExt;
 use crate::vectors::Vec3;
 
 // Utility functions for random number generation
@@ -25,10 +24,12 @@ pub fn range_double_unseeded(min: f64, max: f64) -> f64 {
     value
 }
 
+#[allow(dead_code)]
 #[inline]
 pub fn range_int(min: i32, max: i32, rng: &mut Xoshiro256PlusPlus) -> i32 {
     rng.random_range(min..max)
 }
+#[allow(dead_code)]
 #[inline]
 pub fn range_int_unseeded(min: i32, max: i32) -> i32 {
     rand::rng().random_range(min..max+1)

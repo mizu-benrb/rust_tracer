@@ -8,7 +8,7 @@ use crate::hittable::Hittable;
 use crate::image_io::create_ppm;
 use crate::interval::Interval;
 use crate::ray::Ray;
-use crate::utility::{random_double, random_double_unseeded, sample_square};
+use crate::utility::{random_double, sample_square};
 use crate::vectors::{cross, random_in_unit_disk, unit_vector, Point3, Vec3};
 
 pub struct Camera {

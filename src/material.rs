@@ -1,6 +1,4 @@
-﻿use rand::prelude::ThreadRng;
-use rand::Rng;
-use rand::rngs::Xoshiro256PlusPlus;
+﻿use rand::rngs::Xoshiro256PlusPlus;
 use crate::color::Color;
 use crate::hittable::HitRecord;
 use crate::ray::Ray;

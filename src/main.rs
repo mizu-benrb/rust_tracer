@@ -13,21 +13,18 @@ mod aabb;
 mod bvh;
 
 use std::sync::Arc;
-use std::f64::consts::*;
 use indicatif::{ProgressBar, ProgressStyle};
-use rand::rngs::Xoshiro256PlusPlus;
 use crate::bvh::BvhNode;
 use crate::camera::Camera;
 use crate::vectors::*;
 use crate::color::*;
-use crate::ray::*;
 use crate::raster::*;
 use crate::polyhedrons::*;
 use crate::hittable::*;
-use crate::interval::Interval;
 use crate::material::{Dielectric, Lambertian, Material, Metal};
-use crate::utility::{random_double, random_double_unseeded, range_double, range_double_unseeded};
+use crate::utility::{random_double_unseeded, range_double_unseeded};
 
+#[allow(dead_code)]
 const PHI: f64 = 1.618033988749894;
 
 fn main() {
@@ -95,6 +92,7 @@ fn render_ray_image() {
     cam.render(&bvh_test);
 }
 
+#[allow(dead_code)]
 fn render_ray_image_2() {
 
     let mut world: HittableList = HittableList::new_empty();
@@ -125,6 +123,7 @@ fn render_ray_image_2() {
     cam.render(&world);
 }
 
+#[allow(dead_code)]
 fn render_ray_image_3() {
 
     let mut world: HittableList = HittableList::new_empty();
@@ -182,6 +181,7 @@ fn render_ray_image_3() {
     cam.render(&world);
 }
 
+#[allow(dead_code)]
 fn render_ray_image_4() {
 
     let mut world: HittableList = HittableList::new_empty();
@@ -225,13 +225,14 @@ fn render_ray_image_4() {
     cam.render(&world);
 }
 
+#[allow(dead_code)]
 fn render_creative_image() {
     let canvas = Canvas {
         width: 512,
         height: 512,
         default_color: Color::from(RGBValue { r: 0, g: 10, b: 60 }),
     };
-    let mut frame_buffer: Vec<Color> = vec![Color::new(0.0, 0.0, 0.0); canvas.width as usize * canvas.height as usize];
+    let mut frame_buffer: Vec<Color> = vec![Color::new(0.0, 0.0, 0.0); canvas.width * canvas.height];
 
     let pivot = Pos2::new(255, 255);
     let initial_size = 10;
@@ -263,6 +264,7 @@ fn render_creative_image() {
     output_ppm(&canvas, &frame_buffer);
 }
 
+#[allow(dead_code)]
 fn render_test_image() {
     // Image settings
     let image_width: i32 = 256;
@@ -293,6 +295,7 @@ fn render_test_image() {
     }
 }
 
+#[allow(dead_code)]
 fn render_raster_image() {
     let canvas = Canvas {
         width: 256,
@@ -303,7 +306,7 @@ fn render_raster_image() {
     let color2 = Color::new(0.0, 1.0, 0.0);
     let color3 = Color::new(0.0, 0.0, 1.0);
 
-    let mut frame_buffer: Vec<Color> = vec![Color::new(0.0, 0.0, 0.0); canvas.width as usize * canvas.height as usize];
+    let mut frame_buffer: Vec<Color> = vec![Color::new(0.0, 0.0, 0.0); canvas.width * canvas.height];
 
     let tri_1 = Triangle {
         vertices: [(130, 25), (170, 178), (67, 158)],
@@ -332,10 +335,10 @@ fn render_raster_image() {
         color: color3,
     };
 
-    //tri_1.draw_fill(&canvas, &mut frame_buffer);
-    //tri_2.draw_fill(&canvas, &mut frame_buffer);
-    //tri_3.draw_fill(&canvas, &mut frame_buffer);
-    //cir_1.draw_fill(&canvas, &mut frame_buffer);
+    tri_1.draw_fill(&canvas, &mut frame_buffer);
+    tri_2.draw_fill(&canvas, &mut frame_buffer);
+    tri_3.draw_fill(&canvas, &mut frame_buffer);
+    cir_1.draw_fill(&canvas, &mut frame_buffer);
     quad1.draw_fill(&canvas, &mut frame_buffer);
     square1.draw_fill(&canvas, &mut frame_buffer);
     

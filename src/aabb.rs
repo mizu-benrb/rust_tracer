@@ -46,20 +46,20 @@ impl AABB {
 
         for axis in 0..3 {
             let ax = self.axis_interval(axis);
-            let adinv = 1.0 / ray_dir[axis as usize];
+            let adinv = 1.0 / ray_dir[axis];
 
-            let t0 = (ax.min - ray_orig[axis as usize]) * adinv;
-            let t1 = (ax.max - ray_orig[axis as usize]) * adinv;
+            let t0 = (ax.min - ray_orig[axis]) * adinv;
+            let t1 = (ax.max - ray_orig[axis]) * adinv;
 
             if t0 < t1 {
-                if (t0 > ray_t.min) { new_interval.min = t0; }
-                if (t1 < ray_t.max) { new_interval.max = t1; }
+                if t0 > ray_t.min { new_interval.min = t0; }
+                if t1 < ray_t.max { new_interval.max = t1; }
             } else {
-                if (t1 > ray_t.min) { new_interval.min = t1; }
-                if (t0 < ray_t.max) { new_interval.max = t0; }
+                if t1 > ray_t.min { new_interval.min = t1; }
+                if t0 < ray_t.max { new_interval.max = t0; }
             }
 
-            if (new_interval.max <= new_interval.min) {
+            if new_interval.max <= new_interval.min {
                 return None;
             }
         }

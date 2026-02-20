@@ -83,7 +83,7 @@ fn render_ray_image() {
 
     let bvh_test = HittableList::new(Arc::new(BvhNode::new_from_hittable_list(&mut world)));
 
-    let mut cam: Camera = Camera::new( 16.0 / 9.0, 1920, 512, 32, 20.0);
+    let mut cam: Camera = Camera::new( 16.0 / 9.0, 480, 128, 32, 20.0);
 
     cam.look_from = Point3::new(13.0, 2.0, 3.0);
     cam.look_at = Point3::new(0.0, 0.0, 0.0);

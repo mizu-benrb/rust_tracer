@@ -59,7 +59,7 @@ impl AABB {
                 if (t0 < ray_t.max) { new_interval.max = t0; }
             }
 
-            if (ray_t.max <= ray_t.min) {
+            if (new_interval.max <= new_interval.min) {
                 return None;
             }
         }

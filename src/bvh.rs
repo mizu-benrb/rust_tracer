@@ -36,7 +36,7 @@ impl BvhNode {
             1 => (objects[0].clone(), objects[0].clone()),
             2 => (objects[0].clone(), objects[1].clone()),
             _ => {
-                objects.sort_by(|a, b| {
+                objects.sort_unstable_by(|a, b| {
                     let a_axis_interval = a.bounding_box().axis_interval(axis);
                     let b_axis_interval = b.bounding_box().axis_interval(axis);
                     a_axis_interval.min.partial_cmp(&b_axis_interval.min).unwrap()

@@ -1,7 +1,9 @@
-﻿use rand::rngs::Xoshiro256PlusPlus;
+﻿use std::sync::Arc;
+use rand::rngs::Xoshiro256PlusPlus;
 use crate::color::Color;
 use crate::hittable::HitRecord;
 use crate::ray::Ray;
+use crate::texture::{Solid_Color, Texture};
 use crate::utility::random_double;
 use crate::vectors::{dot, random_unit_vector, reflect, refract, unit_vector, Vec3};
 
@@ -9,13 +11,15 @@ pub trait Material: Send + Sync {
     fn scatter (&self, r_in: &Ray, rec: &HitRecord, rng: &mut Xoshiro256PlusPlus) -> Option<(Color, Ray)>;
 }
 
-#[derive(Copy, Clone, Debug, Default)]
+#[derive(Clone)]
 pub struct Lambertian {
-    albedo: Color,
+    tex: Arc<dyn Texture>,
 }
 
 impl Lambertian {
-    pub fn new(albedo: Color) -> Lambertian { Lambertian { albedo } }
+    pub fn new(albedo: Color) -> Lambertian { Lambertian { tex: Arc::new(Solid_Color::new(&albedo)) } }
+
+    pub fn new_texture(tex: Arc<dyn Texture>) -> Lambertian { Lambertian { tex } }
 }
 
 impl Material for Lambertian {
@@ -28,7 +32,7 @@ impl Material for Lambertian {
         }
 
         let scattered = Ray::new_t(rec.p, scatter_direction, r_in.tm());
-        let attenuation = self.albedo;
+        let attenuation = self.tex.value(rec.u, rec.v, &rec.p);
         Some((attenuation, scattered))
     }
 }

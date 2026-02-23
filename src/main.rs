@@ -11,6 +11,7 @@ mod material;
 mod image_io;
 mod aabb;
 mod bvh;
+mod texture;
 
 use std::sync::Arc;
 use indicatif::{ProgressBar, ProgressStyle};
@@ -22,6 +23,7 @@ use crate::raster::*;
 use crate::polyhedrons::*;
 use crate::hittable::*;
 use crate::material::{Dielectric, Lambertian, Material, Metal};
+use crate::texture::Checker_Texture;
 use crate::utility::{random_double_unseeded, range_double_unseeded};
 
 #[allow(dead_code)]
@@ -35,10 +37,13 @@ fn main() {
 fn render_ray_image() {
 
     let mut world: HittableList = HittableList::new_empty();
-    let material_ground = Arc::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
+    //let material_ground = Arc::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
     //world.add(Arc::new(
     //    Plane::new(Point3::new(0.0, 1.0, 0.0), Vec3::new(0.0, 0.0, 0.0), material_ground)));
-    world.add(Arc::new(Sphere::new(Point3::new(0.0,-1000.0,0.0), 1000.0, material_ground)));
+    //world.add(Arc::new(Sphere::new(Point3::new(0.0,-1000.0,0.0), 1000.0, material_ground)));
+
+    let checker_texture = Arc::new(Checker_Texture::new_solids(0.32, &Color::new(0.2, 0.3, 0.1), &Color::new(0.9, 0.9, 0.9)));
+    world.add(Arc::new(Sphere::new(Point3::new(0.0, -1000.0, 0.0), 1000.0, Arc::new(Lambertian::new_texture(checker_texture)))));
 
     for a in -11..11 {
         for b in -11..11 {

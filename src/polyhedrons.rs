@@ -71,6 +71,8 @@ impl Hittable for Sphere {
 
         let mut hit_record: HitRecord = HitRecord {
             t: root,
+            u: 0.0,
+            v: 0.0,
             p: r.at(root),
             mat: self.mat.clone(),
             normal: (r.at(root) - current_center) / radius,
@@ -113,6 +115,8 @@ impl Hittable for Plane {
         }
         let mut rec = HitRecord {
             t,
+            u: 0.0,
+            v: 0.0,
             p: r.at(t),
             mat: self.mat.clone(),
             normal: self.normal,

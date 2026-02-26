@@ -12,6 +12,7 @@ mod image_io;
 mod aabb;
 mod bvh;
 mod texture;
+mod rtw_image;
 
 use std::sync::Arc;
 use indicatif::{ProgressBar, ProgressStyle};
@@ -23,15 +24,22 @@ use crate::raster::*;
 use crate::polyhedrons::*;
 use crate::hittable::*;
 use crate::material::{Dielectric, Lambertian, Material, Metal};
-use crate::texture::Checker_Texture;
+use crate::texture::{Checker_Texture, Image_Texture};
 use crate::utility::{random_double_unseeded, range_double_unseeded};
 
 #[allow(dead_code)]
 const PHI: f64 = 1.618033988749894;
 
 fn main() {
-    // HW 2
-    render_ray_image();
+    match 6 {
+        1 => render_ray_image(),
+        2 => render_ray_image_2(),
+        3 => render_ray_image_3(),
+        4 => render_ray_image_4(),
+        5 => render_checkered_spheres(),
+        6 => render_earth(),
+        _ => render_ray_image()
+    }
 }
 
 fn render_ray_image() {
@@ -64,7 +72,7 @@ fn render_ray_image() {
                     };
                 let center2 =
                     if choose_material < 0.8 {
-                        center + Vec3::new(0.0, range_double_unseeded(0.0, 0.0), 0.0)
+                        center + Vec3::new(0.0, range_double_unseeded(0.0, 20.0), 0.0)
                     } else {
                         center
                     };
@@ -95,6 +103,46 @@ fn render_ray_image() {
     cam.focus_dist = 10.0;
 
     cam.render(&bvh_test);
+}
+
+fn render_checkered_spheres() {
+    let mut world = HittableList::new_empty();
+
+    let checker = Arc::new(
+        Checker_Texture::new_solids(0.32, &Color::new(0.1, 0.3, 0.8), &Color::new(0.9, 0.9, 0.9)));
+
+    world.add(Arc::new(Sphere::new(Point3::new(0.0, -10.0, 0.0), 10.0, Arc::new(Lambertian::new_texture(checker.clone())))));
+    world.add(Arc::new(Sphere::new(Point3::new(0.0, 10.0, 0.0), 10.0, Arc::new(Lambertian::new_texture(checker.clone())))));
+
+    let bvh = HittableList::new(Arc::new(BvhNode::new_from_hittable_list(&mut world)));
+
+    let mut cam: Camera = Camera::new( 16.0 / 9.0, 480, 128, 32, 20.0);
+
+    cam.look_from = Point3::new(13.0, 2.0, 3.0);
+    cam.look_at = Point3::new(0.0, 0.0, 0.0);
+    cam.vup = Vec3::new(0.0, 1.0, 0.0);
+
+    cam.defocus_angle = 0.0;
+    cam.focus_dist = 10.0;
+
+    cam.render(&bvh);
+}
+
+fn render_earth() {
+    let earth_texture = Arc::new(Image_Texture::new_load("specialweek.png"));
+    let earth_surface = Arc::new(Lambertian::new_texture(earth_texture));
+    let globe = Arc::new(Sphere::new(Point3::new(0.0, 0.0, 0.0), 2.0, earth_surface));
+
+    let mut cam = Camera::new(16.0 / 9.0, 480, 128, 32, 20.0);
+
+    cam.look_from = Point3::new(6.0, 0.0, 6.0);
+    cam.look_at = Point3::new(0.0, 0.0, 0.0);
+    cam.vup = Vec3::new(0.0, 1.0, 0.0);
+
+    cam.defocus_angle = 2.0;
+    cam.focus_dist = 6.0;
+
+    cam.render(&HittableList::new(globe));
 }
 
 #[allow(dead_code)]

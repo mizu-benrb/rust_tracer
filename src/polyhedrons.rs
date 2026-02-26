@@ -3,6 +3,7 @@ use crate::aabb::AABB;
 use crate::hittable::{HitRecord, Hittable};
 use crate::interval::Interval;
 use crate::material::Material;
+use crate::PHI;
 use crate::ray::Ray;
 use crate::vectors::*;
 
@@ -40,6 +41,19 @@ impl Sphere {
                 box1.combine(&box2)
             }
         }
+    }
+
+    // p: given point on sphere of radius one, centered at origin
+    // u: returned value [0,1] of angle around the Y axis from X=-1
+    // v: return value [0,1] of angle from Y=-1 to Y=+1
+    pub fn get_sphere_uv(p: &Point3) -> (f64, f64) {
+        let theta = (-p.y()).acos();
+        let phi = (-p.z()).atan2(p.x()) + std::f64::consts::PI;
+
+        let u = phi / (2.0 * std::f64::consts::PI);
+        let v = theta / std::f64::consts::PI;
+
+        (u, v)
     }
 }
 
@@ -80,6 +94,7 @@ impl Hittable for Sphere {
         };
         let outward_normal = hit_record.normal;
         hit_record.set_face_normal(r, &outward_normal);
+        (hit_record.u, hit_record.v) = Sphere::get_sphere_uv(&outward_normal);
 
         Some(hit_record)
     }
